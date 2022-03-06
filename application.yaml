@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp-argo-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/wmashal/argocd-congigs.git
+    targetRevision: HEAD
+    path: dev
+  destination:
+    server: https://kubernetes.default.svc # <namespace>.default.svc - kubectl get svc - becuase the ArgoCD inside the cluster it can connect to the ClusterIP svc type
+    namespace: myapp # if this namespace not exist so we add a policy to create it see the following lines
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+
+    # these options by default are disabled
+    automated: # two direction sync argo -> cluster and cluster -> argo
+      # pull in 3 minutes interval by default to change this you can define a Git webhook
+      selfHeal: true
+      prune: true
